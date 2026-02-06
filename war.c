@@ -26,7 +26,7 @@ for (i=0; i<5; i++){
     scanf(" %[^\n]s", meusTerritorios[i].nomelocal);
 
     printf ("Cor do exercito: ");
-    scanf ("%d" , meusTerritorios[i].corTime);
+    scanf ("%s" , meusTerritorios[i].corTime);
 
     printf ("Total tropas:");
     scanf ("%d" ,&meusTerritorios[i].qtdTropas);
@@ -40,7 +40,7 @@ printf("NOME               |COR          |TROPAS         \n");
 printf("-------------------------------------------------\n");
 
 for (i=0;  i<5; i++) {
-    //0 %-20sserve para alinhar o texo a esquerda e ficar organizado
+// 0 %-20sserve para alinhar o texo a esquerda e ficar organizado
     printf("%-20s |%-10s |%-6d\n",
     meusTerritorios[i].nomelocal,
 meusTerritorios[i].corTime,
