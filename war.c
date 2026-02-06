@@ -1,64 +1,38 @@
 #include <stdio.h>
-#include <string.h> 
+#include <stdlib.h> 
+#include <string.h>
 
-//aqui eu crio o modelo do territorio do jogo war
-//usei struct para agrupar as informacoes em um lugar so
-
+// Aqui eu digo como é um território
 typedef struct {
-    char nomelocal[30];
+    char nomeLocal[30];
     char corTime[10];
     int qtdTropas;
 } Territorio;
 
-int main () {
-    //criando uma lista para guardar os cinco territorios
-    Territorio meusTerritorios[5];
-    int i; //variavel para o contador do laco
+int main() {
+    int n, i;
+    Territorio *meusTerritorios;
 
-    printf ("=== SISTEMA DE CADASTRO DO JOGO WAR ===\n\n");
-//laco para repetir a pergunta cinco vezes 
+    printf("Quantos territorios voce quer cadastrar? ");
+    scanf("%d", &n);
 
-for (i=0; i<5; i++){
-    printf ("--- Cadastro do %d o lugar---\n", i + 1);
+    // CALLOC: Pede um espaço na memória para guardar os territórios
+    meusTerritorios = (Territorio *)calloc(n, sizeof(Territorio));
 
-    printf ("Nome do territorio: ");
-    //esse espaco no scanf serve para nao pular a leitura do nome
-    scanf(" %[^\n]s", meusTerritorios[i].nomelocal);
+    // Laço para perguntar o nome de cada um
+    for (i = 0; i < n; i++) {
+        printf("\nNome do %d o lugar: ", i + 1);
+        scanf(" %[^\n]s", meusTerritorios[i].nomeLocal);
+        printf("Cor do exercito: ");
+        scanf("%s", meusTerritorios[i].corTime);
+        printf("Quantidade de tropas: ");
+        scanf("%d", &meusTerritorios[i].qtdTropas);
+    }
 
-    printf ("Cor do exercito: ");
-    scanf ("%s" , meusTerritorios[i].corTime);
+    printf("\nPronto! Tudo guardado na memoria.\n");
 
-    printf ("Total tropas:");
-    scanf ("%d" ,&meusTerritorios[i].qtdTropas);
-
-printf ("Territorio salvo com sucesso!\n\n");
+    // FREE: Devolve o espaço que usamos
+    free(meusTerritorios);
+    
+    return 0;
 }
-//Agora vou mostrar na tela tudo o que foi cadastrado
-printf("\n>>> LISTA DE TERRITORIOS NO MAPA <<<\n");
-printf("----------------------------------------------\n");
-printf("NOME               |COR          |TROPAS         \n");
-printf("-------------------------------------------------\n");
-
-for (i=0;  i<5; i++) {
-// 0 %-20sserve para alinhar o texo a esquerda e ficar organizado
-    printf("%-20s |%-10s |%-6d\n",
-    meusTerritorios[i].nomelocal,
-meusTerritorios[i].corTime,
-meusTerritorios[i].qtdTropas);
-}
-printf("----------------------------------------------------\n");
-printf("Fim do programa.\n");
-
-return 0;
-}
-
-
-    
-    
-        
-    
-    
-
-
-
-
