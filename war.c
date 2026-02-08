@@ -1,72 +1,117 @@
 #include <stdio.h>
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <string.h>
-#include <time.h> // Para os dados funcionarem
+#include <time.h>
 
+// Estrutura do territorio
 typedef struct {
     char nomeLocal[30];
     char corTime[10];
     int qtdTropas;
 } Territorio;
 
-// FUNÇÃO DE ATAQUE: Onde a mágica da batalha acontece
-void simularAtaque(Territorio *atacante, Territorio *defensor) {
-    int dadoAtaque = (rand() % 6) + 1; // Sorteia 1 a 6
-    int dadoDefesa = (rand() % 6) + 1;
+// FUNÇÃO: Sorteia uma missão da lista e copia para o jogador
+void atribuirMissao(char* destino, char* listaMissoes[], int total) {
+    int indice = rand() % total;
+    strcpy(destino, listaMissoes[indice]);
+}
 
-printf("\nBatalha: %s vs %s\n", atacante->nomeLocal, defensor->nomeLocal);
-    printf("Dados: Atacante %d | Defensor %d\n", dadoAtaque, dadoDefesa);
+// FUNÇÃO: Verifica se o jogador venceu (Lógica: ter mais de 2 territórios)
+int verificarVitoria(Territorio* mapa, int total) {
+    int contagem = 0;
+    // Para simplificar, vamos contar quantos territorios o primeiro time cadastrado tem
+    char* corObjetivo = mapa[0].corTime;
+    
+    for (int i = 0; i < total; i++) {
+        if (strcmp(mapa[i].corTime, corObjetivo) == 0) {
+            contagem++;
+        }
+    }
+    // Se o jogador dominar 3 ou mais lugares, ele ganha
+    return (contagem >= 3);
+}
 
-    // Se o atacante ganhar ou empatar
-    if (dadoAtaque >= dadoDefesa) {
-        printf("O atacante ganhou! O defensor perdeu 1 tropa.\n");
-        defensor->qtdTropas--;
+// FUNÇÃO: Realiza o ataque entre vizinhos
+void atacar(Territorio* at, Territorio* df) {
+    int dadoAt = (rand() % 6) + 1;
+    int dadoDf = (rand() % 6) + 1;
 
-        // Se o defensor ficar sem nada, o atacante ganha o lugar
-        if (defensor->qtdTropas <= 0) {
-            printf("VITÓRIA! %s conquistou o territorio!\n", atacante->nomeLocal);
-            strcpy(defensor->corTime, atacante->corTime);
-            defensor->qtdTropas = 1;
+    printf("\n>>> DADOS: Atacante %d | Defensor %d\n", dadoAt, dadoDf);
+
+    if (dadoAt > dadoDf) {
+        printf("O atacante venceu! %s perdeu 1 tropa.\n", df->nomeLocal);
+        df->qtdTropas--;
+        if (df->qtdTropas <= 0) {
+            printf("TERRITORIO CONQUISTADO por %s!\n", at->corTime);
+            strcpy(df->corTime, at->corTime);
+            df->qtdTropas = 1;
         }
     } else {
-        printf("A defesa ganhou! O atacante perdeu 1 tropa.\n");
-        if (atacante->qtdTropas > 1) atacante->qtdTropas--;
+        printf("A defesa resistiu! O atacante perdeu 1 tropa.\n");
+        if (at->qtdTropas > 1) at->qtdTropas--;
     }
 }
 
 int main() {
+    srand(time(NULL));
     int n, i;
-    Territorio *meusTerritorios;
-    srand(time(NULL)); // Liga o sorteio de dados
 
-    printf("Quantos territorios voce quer cadastrar? ");
+    // 1. Criando as missões
+    char* listaDeMissoes[] = {
+        "Dominar 3 territorios no mapa",
+        "Eliminar a cor vermelha do jogo",
+        "Conquistar um continente inteiro",
+        "Manter 10 tropas em um unico lugar",
+        "Ocupar 2 territorios vizinhos"
+    };
+
+    printf("--- WAR: DESAFIO FINAL ---\n");
+    printf("Quantos territorios teremos no jogo? ");
     scanf("%d", &n);
 
-    meusTerritorios = (Territorio *)calloc(n, sizeof(Territorio));
+    // 2. Alocação Dinâmica dos territórios e da Missão
+    Territorio* mapa = (Territorio*)calloc(n, sizeof(Territorio));
+    char* missaoJogador = (char*)malloc(100 * sizeof(char));
+
+    // 3. Cadastro e Atribuição de Missão
+    atribuirMissao(missaoJogador, listaDeMissoes, 5);
+    printf("\nSUA MISSAO SECRETA: %s\n", missaoJogador);
 
     for (i = 0; i < n; i++) {
-        printf("\nNome do %d o lugar: ", i + 1);
-        scanf(" %[^\n]s", meusTerritorios[i].nomeLocal);
+        printf("\nTerritorio %d - Nome: ", i + 1);
+        scanf(" %[^\n]s", mapa[i].nomeLocal);
         printf("Cor do exercito: ");
-        scanf("%s", meusTerritorios[i].corTime);
-        printf("Quantidade de tropas: ");
-        scanf("%d", &meusTerritorios[i].qtdTropas);
+        scanf("%s", mapa[i].corTime);
+        printf("Tropas: ");
+        scanf("%d", &mapa[i].qtdTropas);
     }
 
-    // Agora vamos brincar de atacar!
-    int at, df;
-    printf("\nEscolha o numero do Atacante (1 a %d): ", n);
-    scanf("%d", &at);
-    printf("Escolha o numero do Defensor (1 a %d): ", n);
-    scanf("%d", &df);
+    // 4. Rodada de Ataque e Verificação
+    int continua = 1;
+    while (continua) {
+        int a, d;
+        printf("\nQuem ataca (1 a %d) e quem defende? (0 0 para sair): ", n);
+        scanf("%d %d", &a, &d);
 
-    // Faz a batalha acontecer usando os endereços (&)
-    simularAtaque(&meusTerritorios[at-1], &meusTerritorios[df-1]);
+        if (a == 0) break;
 
-    // Devolve a memória no final
-    free(meusTerritorios);
-    printf("\nTrabalho finalizado e memoria limpa!\n");
-    
+        atacar(&mapa[a-1], &mapa[d-1]);
+
+        // Checando se a missão foi cumprida
+        if (verificarVitoria(mapa, n)) {
+            printf("\n************************************\n");
+            printf("PARABENS! Voce cumpriu sua missao:\n[%s]\n", missaoJogador);
+            printf("VOCE EH O VENCEDOR DO WAR!\n");
+            printf("************************************\n");
+            break;
+        }
+    }
+
+    // 5. Limpeza da Memória (Obrigatório)
+    free(mapa);
+    free(missaoJogador);
+    printf("\nMemoria limpa. Fim do desafio final!\n");
+
     return 0;
 }
 
